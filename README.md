@@ -1,2 +1,1 @@
-#Printf - custom function
-Write your own printf function.
+#Printf - Write your own printf function
