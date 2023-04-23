@@ -1,98 +1,134 @@
-#include "main.h"
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 /**
- * _print_char - Prints a character to stdout
+ * _print_str - prints a string to stdout
+ * @str: the string to print
  *
- * @args: A va_list of arguments containing a single int argument
- *
- * Return: The number of characters printed (always 1)
- *
+ * Return: the number of characters printed (excluding null byte)
  */
-int _print_char(va_list args)
+int _print_str(char *str)
 {
-int c = va_arg(args, int);
-putchar(c);
-return (1);
+int i = 0;
+
+if (str == NULL)
+{
+str = "(null)";
+}
+
+while (str[i] != '\0')
+{
+putchar(str[i]);
+i++;
+}
+
+return (i);
 }
 
 /**
- * _print_string - Prints a string to stdout
+ * _print_int - prints an integer to stdout
+ * @n: the integer to print
  *
- * @args: A va_list of arguments containing a single const char * argument
- *
- * Return: The number of characters printed (excluding the null byte used to
- * end output to strings)
- *
+ * Return: the number of characters printed (excluding null byte)
  */
-int _print_string(va_list args)
+int _print_int(int n)
 {
-const char *s = va_arg(args, const char *);
-int count = 0;
+unsigned int num;
+int digits = 0;
+int i = 0;
+char buffer[10];
 
-if (s == NULL)
-s = "(null)";
-
-while (*s)
+if (n < 0)
 {
-putchar(*s);
-s++;
-count++;
+putchar('-');
+num = -n;
+}
+else
+{
+num = n;
 }
 
-return (count);
+do {
+buffer[digits] = num % 10 + '0';
+digits++;
+num /= 10;
+} while (num > 0);
+
+for (i = digits - 1; i >= 0; i--)
+{
+putchar(buffer[i]);
+}
+
+return (digits + (n < 0 ? 1 : 0));
 }
 
 /**
- * _printf - Prints formatted output to stdout
+ * _vprintf - prints formatted output to stdout using a va_list
+ * @format: a string containing format specifiers
+ * @args: a va_list of arguments to print
  *
- * @format: Format string with zero or more directives
- * @...: Optional arguments to substitute in the format string
+ * Return: the number of characters printed (excluding null byte)
+ */
+int _vprintf(const char *format, va_list args)
+{
+int chars_printed = 0;
+char *str_arg;
+char char_arg;
+while (*format != '\0')
+{
+if (*format != '%')
+{
+putchar(*format);
+chars_printed++;
+format++;
+continue;
+}
+
+format++;
+
+switch (*format)
+{
+case 's':
+str_arg = va_arg(args, char *);
+chars_printed += _print_str(str_arg);
+break;
+
+case 'c':
+char_arg = va_arg(args, int);
+putchar(char_arg);
+chars_printed++;
+break;
+
+default:
+putchar('%');
+putchar(*format);
+chars_printed += 2;
+break;
+}
+
+format++;
+}
+
+return (chars_printed);
+}
+
+
+/**
+ * _printf - prints formatted output to stdout
+ * @format: a string containing format specifiers
  *
- * Return: The number of characters printed (excluding the null byte used to
- * end output to strings), or -1 on error
- *
+ * Return: the number of characters printed (excluding null byte)
  */
 int _printf(const char *format, ...)
 {
 va_list args;
-int count = 0;
+int chars_printed = 0;
 
 if (format == NULL)
 return (-1);
 
 va_start(args, format);
-
-while (*format)
-{
-if (*format == '%')
-{
-format++;
-switch (*format)
-{
-case 'c':
-count += _print_char(args);
-break;
-case 's':
-count += _print_string(args);
-break;
-case '%':
-putchar('%');
-count++;
-break;
-default:
-break;
-}
-}
-else
-{
-putchar(*format);
-count++;
-}
-format++;
-}
-
+chars_printed = _vprintf(format, args);
 va_end(args);
 
-return (count);
+return (chars_printed);
 }
